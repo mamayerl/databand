@@ -13,18 +13,24 @@ freq_univariate_helper <- function(df, var){
 }
 
 
-tableband_uni <- function(df, vars){
+tableband_uni <- function(df, vars, weights = NULL){
   label_lookup_map <- lookup_fast(df)
   #label_lookup_map <- data.table(label_lookup_map) ## kann später entfernt werden...
+  df_list <- lapply(vars, function (x) freq_univariate_helper(df, var = x))
 
-  df_list <- lapply(vars, function (x) freq_univariate_helper(df, x))
   df_list <- rbindlist(df_list)
   df_list <- label_lookup_map[df_list, on = c("variable")]
   #df_list[, Fragestellung_neu := NULL]
   #df_list[, id := NULL]
 
+  df_list[, variable := fifelse(id_group >= 2, "-", variable)]
+  df_list[, variable_label := fifelse(id_group >= 2, "-", variable_label)]
+  df_list[, id_group := NULL]
+
   return(df_list)
 }
+
+
 
 
 
