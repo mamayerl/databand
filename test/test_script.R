@@ -8,8 +8,7 @@ library(haven)
 library(forcats)
 library(data.table)
 
-load_all(reset = T)
-
+load_all()
 # Load Data ----
 pp <- read_sav("../../data_band/PP_mar18_final_tna_n=12971.sav")
 pp <- as_factor(pp)
@@ -27,12 +26,7 @@ system.time(out <- lookup_fast(pp2))
 system.time(out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4")))
 system.time(out <- tabellenband_bivariat(pp, all_of(c("q1GEND", "q10KNOW_1")), all_of(c("q10KNOW_5", "q10KNOW_4"))))
 
+tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
 
 funct_univariate_helper(pp, q1GEND)
-
-
-DT = data.table(A=sample(3, 10, TRUE),
-                B=sample(letters[1:3], 10, TRUE), C=sample(10))
-
-# setorder
-setorder(DT, A, -B)
+out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
