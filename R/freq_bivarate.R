@@ -1,34 +1,31 @@
 freq_bivar_helper <- function(df, var, byvar){
 
+  # Ad Missing Values to Factor
   df[, c(var) := fct_na_value_to_level(get(var), level = "(Missing)")]
   df[, c(byvar) := fct_na_value_to_level(get(byvar), level = "(Missing)")]
 
   # create n, perc table
   df_n <- df[, .(n = .N), keyby = c(var, byvar)]
 
-  # Add Sums
-  #df_var <- df[, .(n = .N), keyby = c(var)]
-  #df_var[, c(byvar) := "Total"]
+  # Add Sums for byvar
   df_byvar <- df[, .(n = .N), keyby = c(byvar)]
   df_byvar[, c(var) := "Total"]
-
   df_n <- rbind(df_n, df_byvar)
-  #df_n <- rbind(df_n, df_var, df_byvar)
 
+  # calculate valid percent (Without Missing and Totals)
   df_n <- df_n[get(byvar) != "(Missing)" & get(byvar) != "Total", perc_valid := round((n/sum(n))*100, 1), by = c(var)]
-  #  df_n[, c(var) := fct_na_value_to_level(get(var), level = "(Missing)")]
-#  df_n[, c(byvar) := fct_na_value_to_level(get(byvar), level = "(Missing)")]
-  tab_n <- dcast(df_n, get(var) ~ get(byvar), value.var = "n", fill = 0)
-  tab_n <- tab_n[, Total := rowSums(tab_n[, 2:ncol(tab_n)], na.rm = T)]
-  tab_n[, stat := "n"]
-  # tab_n[, id_group := seq.int(nrow(tab_n))]
 
+  # Spread freq table
+  tab_n <- dcast(df_n, get(var) ~ get(byvar), value.var = "n", fill = 0) # Spread Format
+  tab_n <- tab_n[, Total := rowSums(tab_n[, 2:ncol(tab_n)], na.rm = T)] # Add Totals in Column
+  tab_n[, stat := "n"] # sign statistics variable
+
+  # Sprad perc Table
   tab_perc <- dcast(df_n, get(var) ~ get(byvar), value.var = "perc_valid", fill = 0)
   tab_perc <- tab_perc[, Total := rowSums(tab_perc[, 2:ncol(tab_perc)], na.rm = T)]
   tab_perc[, stat := "Valid Percent"]
-  tab_tot <- rbind(tab_n, tab_perc)
-
-  tab_tot[, id_group := seq.int(nrow(tab_tot))]
+  tab_tot <- rbind(tab_n, tab_perc) # Bind both tables
+  tab_tot[, id_group := seq.int(nrow(tab_tot))] # Add IDs for prettier tables
     #tab_tot[, variable := var]
 
   setnames(tab_tot, old = "var", new = "category")
@@ -38,21 +35,23 @@ freq_bivar_helper <- function(df, var, byvar){
 
 # Function to iterate over vars
 freq_bivar <- function(df, vars, byvar){
-  label_lookup_map <- lookup_fast(df)
+  label_lookup_map <- lookup_fast(df) # Call lookup Funcation for Labels
 
-  df_list <- lapply(vars, function (x) freq_bivar_helper(df, var = x, byvar = byvar))
-  df_list <- rbindlist(df_list)
-  df_list <- label_lookup_map[df_list, on = c("variable")]
-  df_list[, variable := fifelse(id_group > 1, "-", variable)]
-  df_list[, variable_label := fifelse(id_group > 1, "-", variable_label)]
+  df_list <- lapply(vars, function (x) freq_bivar_helper(df, var = x, byvar = byvar)) # iterate over vars
+  df_list <- rbindlist(df_list) # bind result of list to datatable
+  df_list <- label_lookup_map[df_list, on = c("variable")] # Add Labels
+  df_list[, variable := fifelse(id_group > 1, "-", variable)] # Make labels prettier
+  df_list[, variable_label := fifelse(id_group > 1, "-", variable_label)] # make labels prettier
   return(df_list)
 
 }
 
+# Iterate over byvars --> Result in List of byvars for export in Excel-worksheets
 tableband_bi <- function(df, row_vars, col_vars){
   df_list <- lapply(col_vars, function(x) freq_bivar(df, vars = row_vars, byvar = x))
   return(df_list)
 }
+
 
 
 tabellenband_bivariat <- function(df, row_vars, col_vars, perc = "row", version = "long", weighted = F, weight = NULL, show_n_weighted = F, show_n = T, pub_reduced = F){
