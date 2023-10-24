@@ -16,4 +16,23 @@ pp <- as_factor(pp)
 pp2 <- data.table(pp)
 
 
-test <- freq_univariate_helper2(pp2, var = c("q10KNOW_5"))
+test <- freq_univariate_helper2(pp2, var = c("q1GEND"))
+
+
+system.time(out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5") ))
+system.time(out <- funct_univariate_helper(pp, var = q1GEND ))
+system.time(out <- lookup_funct(pp))
+system.time(out <- lookup_fast(pp2))
+
+system.time(out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4")))
+system.time(out <- tabellenband_bivariat(pp, all_of(c("q1GEND", "q10KNOW_1")), all_of(c("q10KNOW_5", "q10KNOW_4"))))
+
+
+funct_univariate_helper(pp, q1GEND)
+
+
+DT = data.table(A=sample(3, 10, TRUE),
+                B=sample(letters[1:3], 10, TRUE), C=sample(10))
+
+# setorder
+setorder(DT, A, -B)
