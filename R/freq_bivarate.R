@@ -1,40 +1,106 @@
 freq_bivar_helper <- function(df, var, byvar){
-  label_lookup_map <- lookup_fast(df)
-
   # crate n, perc table
   df_n <- df[, .(n = .N), keyby = c(var, byvar)]
   df_n <- df_n[, perc := (n/sum(n))*100, by = c(var)]
-  df_n <- df_n[!is.na(get(byvar)), perc_valid := (n/sum(n))*100, by = c(var)]
+  df_n <- df_n[!is.na(get(byvar)), perc_valid := round((n/sum(n))*100, 1), by = c(var)]
   df_n[, c(var) := fct_na_value_to_level(get(var), level = "(Missing)")]
   df_n[, c(byvar) := fct_na_value_to_level(get(byvar), level = "(Missing)")]
 
 
   tab_n <- dcast(df_n, get(var) ~ get(byvar), value.var = "n", fill = 0)
   tab_n[, stat := "n"]
+  tab_n[, id_group := seq.int(nrow(tab_n))]
 
   tab_perc <- dcast(df_n, get(var) ~ get(byvar), value.var = "perc_valid", fill = 0)
   tab_perc[, stat := "Valid Percent"]
+  tab_perc[, id_group := seq.int(nrow(tab_perc))]
 
   tab_tot <- rbind(tab_n, tab_perc)
+  #tab_tot[, variable := var]
 
-#  setnames(df_n, old = "var", new = "category")
+  setnames(tab_tot, old = "var", new = "category")
+  tab_tot[, variable := var]
+  return(tab_tot)
+}
 
-  #df_n[, stat := "n"]
+# Function to iterate over vars
+freq_bivar <- function(df, vars, byvar){
+  label_lookup_map <- lookup_fast(df)
 
-   return(tab_tot)
+  df_list <- lapply(vars, function (x) freq_bivar_helper(df, var = x, byvar = byvar))
+  df_list <- rbindlist(df_list)
+  df_list <- label_lookup_map[df_list, on = c("variable")]
+  df_list[, variable_label := fifelse(id_group > 1, "-", variable_label)]
+  return(df_list)
 
 }
 
+tableband_bi <- function(df, row_vars, col_vars){
+  df_list <- lapply(col_vars, function(x) freq_bivar(df, vars = row_vars, byvar = x))
+  return(df_list)
+}
 
-df_n <- df %>%
-  count({{var}}, {{byvar}}, name = "n") %>%
-  mutate(stat = "n (ungewichtet)") %>%
-  mutate(n = round(n)) %>%
-  mutate("{{byvar}}" := fct_explicit_na({{byvar}}, na_level = "(Fehlend)")) %>%
-  spread({{byvar}}, n, fill = 0) %>%
-  adorn_totals(where = c("col", "row"), name = "Gesamt", fill = "n (ungewichtet)") %>%
-  rename("Kategorie" = 1)
 
+tabellenband_bivariat <- function(df, row_vars, col_vars, perc = "row", version = "long", weighted = F, weight = NULL, show_n_weighted = F, show_n = T, pub_reduced = F){
+
+  col_vars_names <- df %>% select({{col_vars}}) %>% names()
+
+  if(perc == "col") {
+    res_list <- map(col_vars_names, ~funct_bivariate_col(df, var = {{row_vars}}, byvar = .data[[.x]], weighted = weighted, weight = {{weight}}, show_n_weighted = show_n_weighted, show_n = show_n, version = version))
+  }
+  else {
+    res_list <- map(col_vars_names, ~funct_bivariate(df, var = {{row_vars}}, byvar = .data[[.x]], weighted = weighted, weight = {{weight}}, show_n_weighted = show_n_weighted, show_n = show_n, version = version))
+  }
+
+  res_list <- set_names(res_list, col_vars_names) # Bennenung der Liste nach Spaltenvariablen
+  res_list <- map(res_list, ~mutate(.x, Variable = if_else(id_group >=2, "-", Variable))) # Formatiere Tabelle
+  res_list <- map(res_list, ~mutate(.x, Fragestellung = if_else(id_group >=2, "-", Fragestellung)))
+  res_list <- map(res_list, ~select(.x, -id_group, -id)) # Entferne Hilfsvariablen
+  res_list <- map(res_list, ~mutate(.x, Item = if_else(row_number(Item) > 1, "-", Item)))
+  res_list <- map(res_list, ~mutate(.x, Item_Kategorie = if_else(row_number(Item_Kategorie) > 1, "-", Item_Kategorie)))
+  res_list <- map(res_list, ~relocate(.x, Item, Item_Kategorie, .before = 1))
+
+  if(pub_reduced == T){
+    res_list <- map(res_list, ~select(.x, -stat, -Item_Kategorie, -Variable))
+    res_list <- map(res_list, ~filter(.x, Kategorie != "Gesamt"))
+    res_list <- map(res_list, ~filter(.x, Kategorie != "(Fehlend)"))
+  }
+
+  return (res_list)
+}
+
+
+
+funct_bivariate <- function(df, var, byvar, weighted = T, weight = NULL, show_n_weighted = F, show_n = T, version = "long"){
+
+  label_lookup_map <- lookup_funct(df)
+
+  row_vars <- df %>%
+    select({{var}}) %>%
+    names()
+
+  col_var <- df %>%
+    select({{byvar}}) %>%
+    names()
+
+  if(version == "summary") {
+    df_return <-  map(row_vars, ~funct_bivariate_helper_summary(df, var = .data[[.x]], byvar = .data[[{{col_var}}]], weighted = weighted, weight = {{weight}}, show_n_weighted = show_n_weighted, show_n = show_n)) %>%
+      set_names(row_vars) %>% # Benennung der Listen nach den Zeilenvariablen
+      bind_rows(.id = "Variable")
+  }
+  else {
+    df_return <-  map(row_vars, ~funct_bivariate_helper(df, var = .data[[.x]], byvar = .data[[{{col_var}}]], weighted = weighted, weight = {{weight}}, show_n_weighted = show_n_weighted, show_n = show_n)) %>%
+      set_names(row_vars) %>% # Benennung der Listen nach den Zeilenvariablen
+      bind_rows(.id = "Variable")
+  }
+
+  df_return <- df_return %>%
+    left_join(label_lookup_map %>% select(-Fragekategorien, -Fragestellung), by = c("Variable" = "Variable")) %>%
+    relocate(Fragestellung_neu, .after = Variable) %>%
+    rename(Fragestellung = Fragestellung_neu)
+
+  return(df_return)
+}
 
 
 
