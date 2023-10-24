@@ -112,9 +112,9 @@ funct_bivariate_helper <- function(df, var, byvar, weighted = F, weight = NULL, 
 
 
   if (weighted == T){
-    names_perc = "% gültig (gewichtet)"
+    names_perc = "% gÃ¼ltig (gewichtet)"
   } else {
-    names_perc = "% gültig (ungewichtet)"
+    names_perc = "% gÃ¼ltig (ungewichtet)"
   }
 
   # Einfache Kreuztabellierung - Haeufigkeit
@@ -149,12 +149,12 @@ funct_bivariate_helper <- function(df, var, byvar, weighted = F, weight = NULL, 
            flag_na = if_else(gesamt != Haeufigkeit & is.na({{byvar}}), F, T)) %>%
     filter(flag_na == T) %>%
     #filter(!is.na({{byvar}})) %>%
-    mutate(Prozent_gültig = round(Haeufigkeit/sum(Haeufigkeit)*100, 1),
+    mutate(Prozent_gÃ¼ltig = round(Haeufigkeit/sum(Haeufigkeit)*100, 1),
            stat = names_perc) %>%
-    mutate(Prozent_gültig = if_else(is.na({{byvar}}), 0, Prozent_gültig)) %>%
+    mutate(Prozent_gÃ¼ltig = if_else(is.na({{byvar}}), 0, Prozent_gÃ¼ltig)) %>%
     select(-flag_na, -gesamt) %>%
     select(-Haeufigkeit) %>%
-    spread({{byvar}}, Prozent_gültig, fill = 0) %>%
+    spread({{byvar}}, Prozent_gÃ¼ltig, fill = 0) %>%
     adorn_totals(where = c("col"), name = "Gesamt", fill = names_perc) %>%
     rename("Kategorie" = 1)
 
@@ -166,10 +166,10 @@ funct_bivariate_helper <- function(df, var, byvar, weighted = F, weight = NULL, 
   df_perc_gesamt <- df %>%
     count({{byvar}}, name = "Haeufigkeit", wt = {{weight}}) %>%
     filter(!is.na({{byvar}})) %>%
-    mutate(Prozent_gültig = round(Haeufigkeit/sum(Haeufigkeit)*100, 1),
+    mutate(Prozent_gÃ¼ltig = round(Haeufigkeit/sum(Haeufigkeit)*100, 1),
            stat = names_perc) %>%
     select(-Haeufigkeit) %>%
-    spread({{byvar}}, Prozent_gültig, fill = 0) %>%
+    spread({{byvar}}, Prozent_gÃ¼ltig, fill = 0) %>%
     rename("stat" = 1) %>%
     adorn_totals(where = c("col"), name = "Gesamt", fill = names_perc) %>%
     mutate(Kategorie = "Gesamt")
