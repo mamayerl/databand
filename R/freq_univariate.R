@@ -1,4 +1,6 @@
-freq_univariate_helper2 <- function(df, var, weight = NULL){
+## Helper Function Univariate
+
+freq_univariate_helper <- function(df, var){
   tab_n <- df[, .(n = .N), by = var]
   tab_n[, perc := round((n/sum(n))*100, 1)]
   tab_n[!is.na(get(var)), perc_valid := round((n/sum(n))*100, 1)]
@@ -9,6 +11,48 @@ freq_univariate_helper2 <- function(df, var, weight = NULL){
     #tab_n[ , c("id_group", names(tab_n)[names(tab_n) != "id_group"])]
   return(tab_n)
 }
+
+
+tableband_uni <- function(df, vars){
+  label_lookup_map <- lookup_fast(df)
+  #label_lookup_map <- data.table(label_lookup_map) ## kann später entfernt werden...
+
+  df_list <- lapply(vars, function (x) freq_univariate_helper(df, x))
+  df_list <- rbindlist(df_list)
+  df_list <- label_lookup_map[df_list, on = c("variable")]
+  #df_list[, Fragestellung_neu := NULL]
+  #df_list[, id := NULL]
+
+  return(df_list)
+}
+
+
+
+tabellenband_univariat <- function(df, vars, weighted = F, weight = NULL){
+  label_lookup_map <- lookup_funct(df)
+
+  row_vars <- df %>%
+    select({{vars}}) %>%
+    names()
+
+  df_return <-  map(row_vars, ~funct_univariate_helper(df, var = .data[[.x]], weighted = weighted, weight = {{weight}})) %>%
+    set_names(row_vars) %>% # Benennung der Listen nach den Zeilenvariablen
+    bind_rows(.id = "Variable")
+
+  df_return <- df_return %>%
+    left_join(label_lookup_map %>% select(-Fragestellung_neu), by = c("Variable" = "Variable")) %>%
+    relocate(Fragestellung, .after = Variable) %>%
+    relocate(Fragekategorien, .after = Fragestellung)
+
+  df_return <- df_return %>%
+    mutate(Variable = if_else(id_group >=2, "-", Variable)) %>% # Formatiere Tabelle
+    mutate(Fragestellung = if_else(id_group >=2, "-", Fragestellung)) %>%
+    mutate(Fragekategorien = if_else(id_group >=2, "-", Fragekategorien)) %>%
+    select(-id_group, -id) # Entferne Hilfsvariablen
+
+  return(df_return)
+}
+
 
 
 
@@ -67,28 +111,4 @@ funct_univariate_helper <- function(df, var, weighted = F, weight = NULL){
 
 ## Univariate Auswertung
 
-tabellenband_univariat <- function(df, vars, weighted = F, weight = NULL){
-  label_lookup_map <- lookup_funct(df)
-
-  row_vars <- df %>%
-    select({{vars}}) %>%
-    names()
-
-  df_return <-  map(row_vars, ~funct_univariate_helper(df, var = .data[[.x]], weighted = weighted, weight = {{weight}})) %>%
-    set_names(row_vars) %>% # Benennung der Listen nach den Zeilenvariablen
-    bind_rows(.id = "Variable")
-
-  df_return <- df_return %>%
-    left_join(label_lookup_map %>% select(-Fragestellung_neu), by = c("Variable" = "Variable")) %>%
-    relocate(Fragestellung, .after = Variable) %>%
-    relocate(Fragekategorien, .after = Fragestellung)
-
-  df_return <- df_return %>%
-    mutate(Variable = if_else(id_group >=2, "-", Variable)) %>% # Formatiere Tabelle
-    mutate(Fragestellung = if_else(id_group >=2, "-", Fragestellung)) %>%
-    mutate(Fragekategorien = if_else(id_group >=2, "-", Fragekategorien)) %>%
-    select(-id_group, -id) # Entferne Hilfsvariablen
-
-  return(df_return)
-}
 
