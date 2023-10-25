@@ -1,3 +1,17 @@
+#' Frequence Helper Function
+#' Helper Function, which takes various parameters as inputs. Parameters: Do weighting and outputs a reduced summary table (n)
+#'
+#' @param df Input as Data.table
+#' @param var Input as String
+#' @param byvar Input as String
+#' @param summary Summery: True/False
+#' @param weights Input as String
+#'
+#' @return data.table
+#' @export
+#'
+#' @examples freq_bivar_helper(data, var = c("var1"), byvar = c("var2"), summary = T, weights = "gewicht")
+#'
 freq_bivar_helper <- function(df, var, byvar, summary, weights){
 
   # Ad Missing Values to Factor
