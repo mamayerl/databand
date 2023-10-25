@@ -1,8 +1,8 @@
 library(devtools)
 
-library(tidyverse)
+#library(tidyverse)
 library(haven)
-library(janitor)
+#library(janitor)
 library(openxlsx)
 library(haven)
 library(forcats)
@@ -13,9 +13,7 @@ load_all()
 pp <- read_sav("../../data_band/PP_mar18_final_tna_n=12971.sav")
 pp <- as_factor(pp)
 pp2 <- data.table(pp)
-
-
-test <- freq_univariate_helper2(pp2, var = c("q1GEND"))
+pp2[, gewichte := sample(1:9, nrow(pp2), replace = TRUE)/10]
 
 
 system.time(out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5") ))
@@ -23,10 +21,32 @@ system.time(out <- funct_univariate_helper(pp, var = q1GEND ))
 system.time(out <- lookup_funct(pp))
 system.time(out <- lookup_fast(pp2))
 
-system.time(out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4")))
-system.time(out <- tabellenband_bivariat(pp, all_of(c("q1GEND", "q10KNOW_1")), all_of(c("q10KNOW_5", "q10KNOW_4"))))
+system.time(out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), summary = T))
+system.time(out <- tabellenband_bivariat(pp, all_of(c("q1GEND", "q10KNOW_1")), all_of(c("q10KNOW_5", "q10KNOW_4")), version = "summary"))
 
 tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
 
 funct_univariate_helper(pp, q1GEND)
 out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
+out
+
+function1 <- function(x, sq = NULL){
+
+  function2(x = x, sq = sq)
+
+}
+
+function2 <- function(x, sq) {
+  if(is.null(sq)){
+    print(x)
+  } else {
+    x <- x*sq
+    print(x)
+  }
+
+}
+
+
+function1(2)
+function1(2, 4)
+
