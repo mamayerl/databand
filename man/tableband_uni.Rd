@@ -4,10 +4,17 @@
 \alias{tableband_uni}
 \title{Create a Univariate Frequency Table}
 \usage{
-tableband_uni(df, vars, weights = NULL)
+tableband_uni(df, vars, var_labels = T, weights = NULL)
 }
 \arguments{
-\item{weights}{}
+\item{df}{Dataframes}
+
+\item{vars}{Vector of column names}
+
+\item{weights}{Column name of weight vector}
+}
+\value{
+Returns a dataframe with frequency counts (n, percent, valid percent)
 }
 \description{
 Create a Univariate Frequency Table

@@ -8,11 +8,13 @@
 #' @param weight Weight
 #'
 #' @return Returns a single dataframe with frequency of multiple choice answers
+#' @import data.table
 #' @export
 #'
 #' @examples
 #' tableband_mc(df, row_vars = c("GEND", "AGE_gr), col_vars = c("q10KNOW_1", "q10KNOW_2", "q10KNOW_2"), count_factor = "Yes")
-
+#'
+#'
 ## Idee col_vars als Liste eingegeben. Dann kann darüber iteriert werden.
 
 tableband_mc <- function(df, row_vars, col_vars, count_factor, weight = NULL){

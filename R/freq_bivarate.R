@@ -1,17 +1,32 @@
-#' Frequence Helper Function
-#' Helper Function, which takes various parameters as inputs. Parameters: Do weighting and outputs a reduced summary table (n)
+#' Create List of dataframes with bivarite frequency tables
 #'
-#' @param df Input as Data.table
-#' @param var Input as String
-#' @param byvar Input as String
-#' @param summary Summery: True/False
-#' @param weights Input as String
+#' @param df Input as Dataframe
+#' @param row_vars Vector of variable names for breaks
+#' @param col_vars Vector of variable names
+#' @param summary Output as summary (boolean variable)
+#' @param var_labels Use of variable labels (set as attributes in Inputdataframe)
+#' @param weights Variable name of weighting variable
+#' @param col_per If False (Default): row percent, if True: column percent
 #'
-#' @return data.table
+#' @return List of dataframes. Each col_var is a list element.
+#'
+#' @import data.table
 #' @export
 #'
-#' @examples freq_bivar_helper(data, var = c("var1"), byvar = c("var2"), summary = T, weights = "gewicht")
+#' @examples
+#' tableband_bi(pp2, row_vars = c("q1GEND", "q10KNOW_1"), col_vars = c("q10KNOW_5", "q10KNOW_4"), summary = T)
 #'
+
+tableband_bi <- function(df, row_vars, col_vars, summary = F, var_labels = T, weights = NULL, col_per = F){
+  df_list <- lapply(col_vars, function(x) freq_bivar(df, vars = row_vars, byvar = x,
+                                                     summary = summary, var_labels = var_labels,
+                                                     weights = weights, col_per = col_per))
+  return(df_list)
+}
+
+
+# Helper functions ----
+
 freq_bivar_helper <- function(df, var, byvar, summary, weights){
 
   # Ad Missing Values to Factor
@@ -145,10 +160,10 @@ freq_bivar <- function(df, vars, byvar, summary, var_labels, weights, col_per){
 
   if(isFALSE(col_per)){
     df_list <- lapply(vars, function (x) freq_bivar_helper(df, var = x, byvar = byvar, summary = summary,
-                                                         weights = weights)) # iterate over vars
+                                                           weights = weights)) # iterate over vars
   } else {
     df_list <- lapply(vars, function (x) freq_bivar_col_helper(df, var = x, byvar = byvar, summary = summary,
-                                                           weights = weights)) # iterate over vars
+                                                               weights = weights)) # iterate over vars
   }
 
   df_list <- rbindlist(df_list) # bind result of list to datatable
@@ -160,14 +175,5 @@ freq_bivar <- function(df, vars, byvar, summary, var_labels, weights, col_per){
     df_list[, variable_label := fifelse(id_group > 1, "-", variable_label)] # make labels prettier
   }
 
-  return(df_list)
-}
-
-
-# Iterate over byvars --> Result in List of byvars for export in Excel-worksheets
-tableband_bi <- function(df, row_vars, col_vars, summary = F, var_labels = T, weights = NULL, col_per = F){
-  df_list <- lapply(col_vars, function(x) freq_bivar(df, vars = row_vars, byvar = x,
-                                                     summary = summary, var_labels = var_labels,
-                                                     weights = weights, col_per = col_per))
   return(df_list)
 }

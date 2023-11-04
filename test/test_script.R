@@ -1,14 +1,10 @@
 library(devtools)
 
-#library(tidyverse)
 library(haven)
-#library(janitor)
 library(openxlsx)
 library(haven)
-library(forcats)
-library(data.table)
 
-rm(ls())
+rm(list = ls())
 load_all()
 
 # Load Data ----
@@ -16,6 +12,10 @@ pp <- read_sav("../../data_band/PP_mar18_final_tna_n=12971.sav")
 pp <- as_factor(pp)
 pp2 <- data.table(pp)
 
+
+## Test Functions
+out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5"))
+out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5"), var_labels = T)
 
 
 pp2[, gewichte := sample(1:9, nrow(pp2), replace = TRUE)/10]

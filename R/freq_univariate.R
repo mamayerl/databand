@@ -1,16 +1,45 @@
-## Helper Function Univariate
-
-#' Helper Function for Univariate Tables
-#' Create a simple frequency table. Is a helper function.
+#' Create a Univariate Frequency Table
 #'
-#' @param df
-#' @param var
-#' @param weights
 #'
-#' @return data.table
+#' @param df Dataframes
+#' @param vars Vector of column names
+#' @param weights Column name of weight vector
+#'
+#' @return Returns a dataframe with frequency counts (n, percent, valid percent)
 #' @export
 #'
 #' @examples
+#' tableband_uni(df, vars = c("var1", "var2))
+#' @import data.table
+
+tableband_uni <- function(df, vars, var_labels = T, weights = NULL){
+
+  if(isTRUE(var_labels)){
+    label_lookup_map <- lookup_fast(df) # Create Lookup Table for adding Labels
+  }
+
+
+  df_list <- lapply(vars, function (x) freq_univariate_helper(df, var = x, weights = weights)) # Apply Function on multiple Vars
+
+  df_list <- rbindlist(df_list)
+
+  if(isTRUE(var_labels)){
+    df_list <- label_lookup_map[df_list, on = c("variable")] # Add Variable Labels from Lookup Table
+  }
+
+  # Make Table pretty
+  df_list[, variable := fifelse(id_group >= 2, "-", variable)]
+
+  if(isTRUE(var_labels)){
+    df_list[, variable_label := fifelse(id_group >= 2, "-", variable_label)]
+  }
+
+  df_list[, id_group := NULL]
+
+  return(df_list)
+}
+
+### Helper functions -----
 freq_univariate_helper <- function(df, var, weights){
 
   if(is.null(weights)){
@@ -31,30 +60,6 @@ freq_univariate_helper <- function(df, var, weights){
 }
 
 
-#' Create a Univariate Frequency Table
-#'
-#' @param df
-#' @param vars
-#' @param weights
-#'
-#' @return
-#' @export
-#'
-#' @examples tableband_uni(df, vars = c("var1", "var2))
-tableband_uni <- function(df, vars, weights = NULL){
-  label_lookup_map <- lookup_fast(df) # Create Lookup Table for adding Labels
-  df_list <- lapply(vars, function (x) freq_univariate_helper(df, var = x, weights = weights)) # Apply Function on multiple Vars
-
-  df_list <- rbindlist(df_list)
-  df_list <- label_lookup_map[df_list, on = c("variable")] # Add Variable Labels from Lookup Table
-
-  # Make Table pretty
-  df_list[, variable := fifelse(id_group >= 2, "-", variable)]
-  df_list[, variable_label := fifelse(id_group >= 2, "-", variable_label)]
-  df_list[, id_group := NULL]
-
-  return(df_list)
-}
 
 
 

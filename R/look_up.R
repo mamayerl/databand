@@ -1,5 +1,16 @@
+
 ## Lookup Table fuer Beschriftung
 
+#' Title
+#'
+#' @param df
+#'
+#' @return
+#' @export
+#' @import data.table
+#' @import forcats
+#'
+#' @examples
 lookup_fast <- function(df){
   label_lookup_map <- lapply(df, function(x){attr(x, which = "label", exact = T)})
   label_lookup_map <- do.call("rbind", label_lookup_map)
