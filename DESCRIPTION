@@ -4,8 +4,7 @@ Title: Tool for producing databands
 Version: 0.1.0
 Author: Martin Mayerl
 Maintainer: Martin Mayerl <mayerl@posteo.org>
-Description: The aim of databand is to generate tables specifically for Excel export. 
-A special feature is that the labels of variables are shown in the tables. The output is given in a list which can be exported to Excel.
+Description: The aim of databand is to generate tables specifically for Excel export. A special feature is that the labels of variables are shown in the tables. The output is given in a list which can be exported to Excel.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

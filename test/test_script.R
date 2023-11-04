@@ -8,11 +8,16 @@ library(haven)
 library(forcats)
 library(data.table)
 
+rm(ls())
 load_all()
+
 # Load Data ----
 pp <- read_sav("../../data_band/PP_mar18_final_tna_n=12971.sav")
 pp <- as_factor(pp)
 pp2 <- data.table(pp)
+
+
+
 pp2[, gewichte := sample(1:9, nrow(pp2), replace = TRUE)/10]
 
 
@@ -24,11 +29,19 @@ system.time(out <- lookup_fast(pp2))
 system.time(out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), summary = T))
 system.time(out <- tabellenband_bivariat(pp, all_of(c("q1GEND", "q10KNOW_1")), all_of(c("q10KNOW_5", "q10KNOW_4")), version = "summary"))
 
-tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
+test <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
+test <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), summary = T, weights = "age")
+
+t <- tableband_mc(pp2, row_vars = c("q1GEND", "attribute_4"), col_vars = c("q10KNOW_5", "q10KNOW_2", "q10KNOW_4"), count_factor = "Yes")
+
+system.time(t <- tableband_mc(pp2, row_vars = c("q1GEND", "attribute_4"), col_vars = c("q10KNOW_5", "q10KNOW_2", "q10KNOW_4"), count_factor = "Yes"))
 
 funct_univariate_helper(pp, q1GEND)
 system.time(out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), var_labels = F))
 out
+
+#test <- tableband_mc(pp2, row_vars = c("q1GEND", "attribute_4"), col_vars = c("q10KNOW_5", "q10KNOW_4", "q10KNOW_1"), count_factor = "Yes")
+
 
 function1 <- function(x, sq = NULL){
 
