@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of databand is to ...
+The aim of databand is to generate tables specifically for Excel export. A special feature is that the labels of variables are shown in the tables. The output is given in a list which can be exported to Excel. 
 
 ## Installation
 
@@ -26,7 +26,7 @@ You can install the development version of databand from [GitHub](https://github
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("mamayerl/data_band")
+devtools::install_github("mamayerl/databand")
 ```
 
 ## Example
@@ -38,18 +38,6 @@ library(databand)
 ## basic example code
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+## Version and Changlog
 
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+0.1.0 Development Version: Setting up basic functions
