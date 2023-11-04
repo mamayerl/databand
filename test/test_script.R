@@ -27,7 +27,7 @@ system.time(out <- tabellenband_bivariat(pp, all_of(c("q1GEND", "q10KNOW_1")), a
 tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
 
 funct_univariate_helper(pp, q1GEND)
-out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
+system.time(out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), var_labels = F))
 out
 
 function1 <- function(x, sq = NULL){

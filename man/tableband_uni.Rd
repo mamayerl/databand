@@ -4,7 +4,7 @@
 \alias{tableband_uni}
 \title{Create a Univariate Frequency Table}
 \usage{
-tableband_uni(df, vars)
+tableband_uni(df, vars, weights = NULL)
 }
 \arguments{
 \item{weights}{}

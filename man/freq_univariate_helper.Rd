@@ -3,17 +3,17 @@
 \name{freq_univariate_helper}
 \alias{freq_univariate_helper}
 \title{Helper Function for Univariate Tables
-Create a simple frequency table.}
+Create a simple frequency table. Is a helper function.}
 \usage{
-freq_univariate_helper(df, var)
+freq_univariate_helper(df, var, weights)
 }
 \arguments{
-\item{var}{}
+\item{weights}{}
 }
 \value{
 data.table
 }
 \description{
 Helper Function for Univariate Tables
-Create a simple frequency table.
+Create a simple frequency table. Is a helper function.
 }
