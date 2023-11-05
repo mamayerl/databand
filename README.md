@@ -32,3 +32,7 @@ library(databand)
 ## Version and Changlog
 
 0.1.0 Development Version: Setting up basic functions
+
+## Known Bugs
+
+- mean_bi: drop empty factor which shouldn’t be
