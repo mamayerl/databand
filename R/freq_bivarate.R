@@ -21,6 +21,8 @@ tableband_bi <- function(df, row_vars, col_vars, summary = F, var_labels = T, we
   df_list <- lapply(col_vars, function(x) freq_bivar(df, vars = row_vars, byvar = x,
                                                      summary = summary, var_labels = var_labels,
                                                      weights = weights, col_per = col_per))
+
+  names(df_list) <- col_vars
   return(df_list)
 }
 
