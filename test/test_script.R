@@ -17,6 +17,15 @@ pp2 <- data.table(pp)
 out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5"))
 out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5"), var_labels = T)
 
+## Mittelwert
+var_old <- paste0("q10KNOW_", c(1:3))
+var_new <- paste0("n_", var_old)
+
+pp2[, (var_new) := lapply(.SD, as.numeric), .SDcols = var_old]
+test <- mean_bi(pp2, row_vars = c("q1GEND", "attribute_4"), col_var = var_new)
+mean_bi_helper(pp2, row_vars = c("q1GEND", "attribute_4"), col_var = c("n_q10KNOW_1"), digits = 3)
+
+
 
 pp2[, gewichte := sample(1:9, nrow(pp2), replace = TRUE)/10]
 
