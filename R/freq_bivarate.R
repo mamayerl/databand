@@ -3,7 +3,7 @@
 #' @param df Input as Dataframe
 #' @param row_vars Vector of variable names for breaks
 #' @param col_vars Vector of variable names
-#' @param summary Output as summary (boolean variable)
+#' @param summary Output as summary (boolean)
 #' @param var_labels Use of variable labels (set as attributes in Inputdataframe)
 #' @param weights Variable name of weighting variable
 #' @param col_per If False (Default): row percent, if True: column percent
@@ -18,9 +18,18 @@
 #'
 
 tableband_bi <- function(df, row_vars, col_vars, summary = F, var_labels = T, weights = NULL, col_per = F){
-  df_list <- lapply(col_vars, function(x) freq_bivar(df, vars = row_vars, byvar = x,
-                                                     summary = summary, var_labels = var_labels,
-                                                     weights = weights, col_per = col_per))
+  check_varnames(row_vars, col_vars) ## Check if Inputvariables are identical
+
+  df_list <- lapply(col_vars, function(x) {
+    out <- freq_bivar(df, vars = row_vars, byvar = x, summary = summary, var_labels = var_labels,
+               weights = weights, col_per = col_per)
+
+    if(isTRUE(var_labels)) {
+      out <- out[, !c("item_name", "item_variable_name")]
+    }
+
+    return(out)
+    })
 
   names(df_list) <- col_vars
   return(df_list)
@@ -156,10 +165,6 @@ freq_bivar_col_helper <- function(df, var, byvar, summary, weights){
 # Function to iterate over vars
 freq_bivar <- function(df, vars, byvar, summary, var_labels, weights, col_per){
 
-  if(isTRUE(var_labels)){
-    label_lookup_map <- lookup_fast(df) # Call lookup Funcation for Labels
-  }
-
   if(isFALSE(col_per)){
     df_list <- lapply(vars, function (x) freq_bivar_helper(df, var = x, byvar = byvar, summary = summary,
                                                            weights = weights)) # iterate over vars
@@ -173,6 +178,8 @@ freq_bivar <- function(df, vars, byvar, summary, var_labels, weights, col_per){
   df_list[, variable := fifelse(id_group > 1, "-", variable)] # Make labels prettier
 
   if(isTRUE(var_labels)){
+    label_lookup_map <- lookup_fast(df) # Call lookup Function for Labels
+
     df_list <- label_lookup_map[df_list, on = c("variable")] # Add Labels
     df_list[, variable_label := fifelse(id_group > 1, "-", variable_label)] # make labels prettier
   }

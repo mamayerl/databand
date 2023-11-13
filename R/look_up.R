@@ -11,19 +11,26 @@
 #' @import forcats
 #'
 #' @examples
-lookup_fast <- function(df){
-  label_lookup_map <- lapply(df, function(x){attr(x, which = "label", exact = T)})
-  label_lookup_map <- do.call("rbind", label_lookup_map)
-  label_lookup_map <- data.table(label_lookup_map, keep.rownames = T)
-  setnames(label_lookup_map, old = "rn", new = "variable")
-  setnames(label_lookup_map, old = "V1", new = "variable_label")
+lookup_fast <- function(df, attribute_name = "label", item_text = c("[", "]")){
+  lookup <- lapply(df, function(x){attr(x, which = "label", exact = T)})
+  lookup <- do.call("rbind", lookup)
+  lookup <- data.table(lookup, keep.rownames = T)
+  setnames(lookup, old = "rn", new = "variable")
+  setnames(lookup, old = "V1", new = "variable_label")
 
-  #setDT(label_lookup_map, keep.rownames = TRUE)
-  #label_lookup_map$variables <- rownames(label_lookup_map)
-  #label_lookup_map <- data.table(label_lookup_map)
-  #label_lookup_map[, variables := rownames(label_lookup_map)]
-  return(label_lookup_map)
+  ## Extract Item - Values
+  lookup[, c("item_name", "item_variable_name") := tstrsplit(variable_label, split = item_text[2])]
+  lookup[, item_name := gsub(item_text[1], "", item_name, fixed = T)]
+
+  ## Setting right columns
+  lookup[, item_name := fifelse(is.na(item_variable_name), NA_character_, item_name)]
+
+  return(lookup)
 }
+
+
+## Extract Text outside the brackes
+#label_tab[, c("variable_left", "variable_right") := tstrsplit(variable_label, split = "\\[([^]]+)\\]", perl = T)]
 
 
 

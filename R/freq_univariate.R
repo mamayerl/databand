@@ -25,6 +25,7 @@ tableband_uni <- function(df, vars, var_labels = T, weights = NULL){
 
   if(isTRUE(var_labels)){
     df_list <- label_lookup_map[df_list, on = c("variable")] # Add Variable Labels from Lookup Table
+    df_list <- df_list[, !c("item_name", "item_variable_name")]
   }
 
   # Make Table pretty
@@ -33,6 +34,7 @@ tableband_uni <- function(df, vars, var_labels = T, weights = NULL){
   if(isTRUE(var_labels)){
     df_list[, variable_label := fifelse(id_group >= 2, "-", variable_label)]
   }
+
 
   df_list[, id_group := NULL]
 

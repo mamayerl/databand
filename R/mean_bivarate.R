@@ -1,13 +1,25 @@
-mean_bi <- function(df, row_vars, col_vars, weight = NULL, var_labels = F, digits = 2){
+mean_bi <- function(df, row_vars, col_vars, weight = NULL, var_labels = F, digits = 2, summary = F){
+
+  check_varnames(row_vars, col_vars)
 
   mean_bi <- lapply(col_vars, function(x){
     mean_bi_helper(df, row_vars = row_vars, col_var = x, weight = weight, var_labels = var_labels)
   })
 
   mean_bi <- Reduce(function(df1, df2) merge(df1, df2, all.x = T, all.y = F, sort = F), mean_bi)
-  mean_bi <- mean_bi[, !c("id")]
 
-  ## Reduzierte Variante einführen mit n(min)
+
+  ## Reduzierte Variante einführen mit n(min): funktioniert aber nooch nicht!!
+  if(isTRUE(summary)){
+    mean_tab <- mean_bi[stat == "mean", ]
+    mean_n <- mean_bi[stat == "n", ]
+    mean_n[, n_min := apply(.SD, 1, min, na.rm = T), .SDcols = col_vars]
+    #mean_n[, n_min := min(.SD, na.rm = T), .SDcols = col_vars]
+    mean_n[, !c(..col_vars)]
+    mean_bi <- merge(mean_tab, mean_n, all.x = T, sort = F)
+  }
+
+  mean_bi <- mean_bi[, !c("id")]
 
 }
 
@@ -15,7 +27,7 @@ mean_bi <- function(df, row_vars, col_vars, weight = NULL, var_labels = F, digit
 mean_bi_helper <- function(df, row_vars, col_var, weight = NULL, var_labels = F, digits = 2){
 
   if (!is.numeric(df[[col_var]]))
-    stop(paste0(col_var , "is not numeric!"))
+    stop(paste0(col_var , " is not numeric!"))
 
   if(isTRUE(var_labels)){
     label_lookup_map <- lookup_fast(df) # Create Lookup Table for adding Labels
