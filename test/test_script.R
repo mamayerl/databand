@@ -3,6 +3,7 @@ library(devtools)
 library(haven)
 library(openxlsx)
 library(surveydata)
+library(sjlabelled)
 data("membersurvey") ## Funktioniert nur schlecht, da eigene Klasse
 load_all()
 
@@ -17,9 +18,7 @@ pp2[, gewichte := sample(1:9, nrow(pp2), replace = TRUE)/10]
 label_tab <- lookup_fast(pp2, attribute_name = "labels", item_text = c("[", "]"))
 out <- tableband_mc(pp2, row_vars = c("q1GEND", "attribute_4"),
                     col_vars = c("q10KNOW_5", "q10KNOW_2", "q10KNOW_4"),
-                    count_factor = "Yes", item_labels = F)
-
-
+                    count_factor = "Yes", item_labels = T)
 
 
 
@@ -39,9 +38,13 @@ out <- tableband_mc(pp2, row_vars = c("q1GEND", "attribute_4"), col_vars = c("q1
 ### tableband_mean ----
 var_old <- paste0("q10KNOW_", c(1:3))
 var_new <- paste0("n_", var_old)
-pp2[, (var_new) := lapply(.SD, as.numeric), .SDcols = var_old]
+pp2[, (var_old) := lapply(.SD, as.numeric), .SDcols = c(var_old)]
+pp2 <- copy_labels(pp2, pp)
 
-test <- mean_bi(pp2, row_vars = c("q1GEND", "attribute_4"), col_var = c(var_new, "q1GEND"), summary = T)
+test <- tableband_mean(pp2, row_vars = c("q1GEND", "attribute_4"), col_var = c(var_old), summary = T, item_labels = T, var_labels = T)
+test <- mean_bi(pp2, row_vars = c("q1GEND", "attribute_4"), col_var = c(var_old), summary = T)
+
+test <- mean_bi_helper(pp2, row_vars = c("q1GEND", "attribute_4"), col_var = var_new[1])
 
 ### Performance Tests ----
 system.time(out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5") ))
