@@ -15,7 +15,7 @@
 #' tableband_mc(df, row_vars = c("GEND", "AGE_gr), col_vars = c("q10KNOW_1", "q10KNOW_2", "q10KNOW_2"), count_factor = "Yes")
 #'
 #'
-## Idee col_vars als Liste eingegeben. Dann kann darÃ¼ber iteriert werden.
+## Idee col_vars als Liste eingegeben. Dann kann darüber iteriert werden.
 
 tableband_mc <- function(df, row_vars, col_vars, count_factor, item_labels = T, weight = NULL){
 
@@ -28,17 +28,16 @@ tableband_mc <- function(df, row_vars, col_vars, count_factor, item_labels = T, 
   tab_bi <- Reduce(function(df1, df2) merge(df1, df2, all.x = T, all.y = F, sort = F), tab_bi)
   tab_bi <- tab_bi[, !c("id")]
 
-
+  ### Item names einfuegen
   if(isTRUE(item_labels)){
-    ### Item names einfügen
     label_tab <- lookup_fast(df)
     names(tab_bi)[names(tab_bi) %in% label_tab$variable] <-
       label_tab$item_name[match(names(tab_bi)[names(tab_bi) %in% label_tab$variable], label_tab$variable)]
 
     ### Add item variable name
     item_variable_name <- label_tab$item_variable_name[match(col_vars[1][col_vars[1] %in% label_tab$variable], label_tab$variable)]
-    reps <- rep("-", length(out)-1)
-    tab_bi[, item_variable_name := c(item_variable_name, rep("-", length(tab_bi)-1))]
+    reps <- rep("-", length(tab_bi)-1)
+    tab_bi[, item_variable_name := c(item_variable_name, rep("-", .N-1))]
   }
 
   return(tab_bi)
