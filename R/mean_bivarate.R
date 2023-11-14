@@ -1,6 +1,45 @@
+tableband_mean <- function(df, row_vars, col_vars, weight = NULL, var_labels = F, digits = 2, summary = F, item_labels = F){
+
+  check_varnames(row_vars, col_vars) ## Check if row vars equals col_vars
+
+  if(isTRUE(var_labels)){
+    label_tab <- lookup_fast(df) # Create Lookup Table for adding Labels
+  }
+
+  tab_mean <- mean_bi(df = df, row_vars = row_vars, col_vars = col_vars,
+                      weight = weight, var_labels = var_labels, digits = digits, summary = summary)
+
+  if(isTRUE(item_labels) | isTRUE(var_labels)){
+    label_tab <- lookup_fast(df)
+  }
+
+  if(isTRUE(item_labels)){
+    ### Item names einfügen
+    names(tab_mean)[names(tab_mean) %in% label_tab$variable] <-
+      label_tab$item_name[match(names(tab_mean)[names(tab_mean) %in% label_tab$variable], label_tab$variable)]
+
+    ### Add item variable name
+    item_variable_name <- label_tab$item_variable_name[match(col_vars[1][col_vars[1] %in% label_tab$variable], label_tab$variable)]
+    reps <- rep("-", length(tab_mean)-1)
+    tab_mean[, item_variable_name := c(item_variable_name, rep("-", .N-1))]
+  }
+
+  if(isTRUE(var_labels)){
+    tab_mean <- label_tab[tab_mean, on = c("variable")] # Add Labels
+    tab_mean[, variable_label := fifelse(id > 1, "-", variable_label)] # make labels prettier
+    tab_mean <- tab_mean[, !c("item_name", "item_variable_name")]
+  }
+
+  tab_mean <- tab_mean[, !c("id")]
+
+  return(tab_mean)
+}
+
+
+
+
 mean_bi <- function(df, row_vars, col_vars, weight = NULL, var_labels = F, digits = 2, summary = F){
 
-  check_varnames(row_vars, col_vars)
 
   mean_bi <- lapply(col_vars, function(x){
     mean_bi_helper(df, row_vars = row_vars, col_var = x, weight = weight, var_labels = var_labels)
@@ -9,18 +48,16 @@ mean_bi <- function(df, row_vars, col_vars, weight = NULL, var_labels = F, digit
   mean_bi <- Reduce(function(df1, df2) merge(df1, df2, all.x = T, all.y = F, sort = F), mean_bi)
 
 
-  ## Reduzierte Variante einführen mit n(min): funktioniert aber nooch nicht!!
+  ## Reduzierte Variante einfÃ¼hren mit n(min): funktioniert aber nooch nicht!!
   if(isTRUE(summary)){
     mean_tab <- mean_bi[stat == "mean", ]
     mean_n <- mean_bi[stat == "n", ]
     mean_n[, n_min := apply(.SD, 1, min, na.rm = T), .SDcols = col_vars]
-    #mean_n[, n_min := min(.SD, na.rm = T), .SDcols = col_vars]
-    mean_n[, !c(..col_vars)]
-    mean_bi <- merge(mean_tab, mean_n, all.x = T, sort = F)
+    mean_n <- mean_n[, !c(..col_vars)]
+    mean_bi <- cbind(mean_tab, n_min = mean_n$n_min)
   }
 
-  mean_bi <- mean_bi[, !c("id")]
-
+  #mean_bi <- mean_bi[, !c("id")]
 }
 
 
@@ -28,10 +65,6 @@ mean_bi_helper <- function(df, row_vars, col_var, weight = NULL, var_labels = F,
 
   if (!is.numeric(df[[col_var]]))
     stop(paste0(col_var , " is not numeric!"))
-
-  if(isTRUE(var_labels)){
-    label_lookup_map <- lookup_fast(df) # Create Lookup Table for adding Labels
-  }
 
   #df[, c(row_vars) := fct_na_value_to_level(get(row_vars), level = "(Missing)")]
   df[, (row_vars) := lapply(.SD, function (x){ fct_na_value_to_level(x, level = "(Missing)")}), .SDcols = row_vars]
@@ -54,17 +87,21 @@ mean_bi_helper <- function(df, row_vars, col_var, weight = NULL, var_labels = F,
 
   ## create n table: noch fertig stellen, n funktioniert noch nicht ganz
   mean_bi_n <- lapply(row_vars, function(x){
-    tab_n <- df[, .(n = .N), by = c(x, col_var)]
+    #tab_n <- df[, .(n = .N), by = c(x, col_var)]
+    tab_n <- df[, .(n = sum(!is.na(.SD))), by = c(x), .SDcols = c(col_var)]
     tab_n <- tab_n[!is.na(get(x)), ]
-    tab_n <- cube(tab_n, .(n = sum(n)), by = x)
+    tab_n <- cube(tab_n, .(n = sum(n)), by = c(x))
     tab_n[, (x) := fct_na_value_to_level(get(x), level = "Total")]
     tab_n[, variable := x]
     tab_n[, id := 1:.N]
     tab_n[, stat := "n"]
     setnames(tab_n, old = x, new = "category")
     setnames(tab_n, old = "n", new = col_var)
+
     return(tab_n)
   })
+
+  #return(mean_bi_n)
 
   mean_bi_n <- rbindlist(mean_bi_n)
 
@@ -130,14 +167,14 @@ funct_mean_helper <- function(df, row_var, col_var, weighted = F, weight = NULL)
     summarise(across({{col_var}}, ~sum(!is.na(.x)))) %>%
     pivot_longer(-Kategorie, names_to = "Variable", values_to = "n") %>%
     #pivot_wider( names_from = {{row_var}}, values_from = n) %>%
-    mutate(stat = "n_gültig (ungewichtet)") %>%
+    mutate(stat = "n_gÃ¼ltig (ungewichtet)") %>%
     mutate(Kategorie = fct_explicit_na(Kategorie, na_level = "(Fehlend)"))
 
 
   tab_mean_n_overall <-   df %>%
     summarise(across({{col_var}}, ~sum(!is.na(.x)))) %>%
     pivot_longer(1, names_to = "Variable", values_to = "n") %>%
-    mutate(stat = "n_gültig (ungewichtet)") %>%
+    mutate(stat = "n_gÃ¼ltig (ungewichtet)") %>%
     mutate(Kategorie = "Gesamt")
 
 
