@@ -1,3 +1,22 @@
+#' Create a bivarate mean table with breaks
+#'
+#' @param df Input: data.frame or data.table
+#' @param row_vars Vector of variable names for breaks
+#' @param col_vars Vector of variable names
+#' @param weight Variable name of weighting variable
+#' @param var_labels Use of variable labels (set as attributes in Inputdataframe)
+#' @param digits Digits of mean
+#' @param summary Output as summary (boolean)
+#' @param item_labels Boolean parameter for showing item labels (Default: True) or variable names (False). The item labels are generated from attributes ("label").
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' var_old <- paste0("q10KNOW_", c(1:3))
+#' test <- tableband_mean(pp2, row_vars = c("q1GEND", "attribute_4"), col_var = c(var_old), summary = T, item_labels = T, var_labels = T)
+
+
 tableband_mean <- function(df, row_vars, col_vars, weight = NULL, var_labels = F, digits = 2, summary = F, item_labels = F){
 
   check_varnames(row_vars, col_vars) ## Check if row vars equals col_vars

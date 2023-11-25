@@ -5,6 +5,7 @@
 #' @param row_vars Variables for Breaks
 #' @param col_vars Multiple Choice Variables to count for
 #' @param count_factor Factor Level to count for
+#' @param item_labels Boolean parameter for showing item labels (Default: True) or variable names (False). The item labels are generated from attributes ("label").
 #' @param weight Weight
 #'
 #' @return Returns a single dataframe with frequency of multiple choice answers
