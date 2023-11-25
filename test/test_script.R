@@ -32,6 +32,8 @@ out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
 out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), var_labels = F)
 out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), summary = T, weights = "age")
 
+out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("attribute_4", "q10KNOW_4"), summary = T, weights = "age")
+
 ### tableband_mc ----
 out <- tableband_mc(pp2, row_vars = c("q1GEND", "attribute_4"), col_vars = c("q10KNOW_5", "q10KNOW_2", "q10KNOW_4"), count_factor = "Yes")
 

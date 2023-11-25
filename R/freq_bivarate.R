@@ -80,12 +80,19 @@ freq_bivar_helper <- function(df, var, byvar, summary, weights){
   }
 
   if(isTRUE(summary)){
-    tab_perc[, "(Missing)" := NULL]
+
+    if(any("(Missing)" %in% colnames(tab_n))){
+      tab_perc[, "(Missing)" := NULL]
+    }
+
     tab_n[, Total := NULL]
     tab_n[, "n_valid" := rowSums(tab_n[, 2:(ncol(tab_perc)-2)], na.rm = T)]
-    setnames(tab_n, old = "(Missing)", new = "n_missing")
-    tab_n <- tab_n[, .(var, n_valid, n_missing)]
 
+    if(any("(Missing)" %in% colnames(tab_n))){
+      setnames(tab_n, old = "(Missing)", new = "n_missing")
+    } else tab_n[, n_missing := NA]
+
+    tab_n <- tab_n[, .(var, n_valid, n_missing)]
     tab_tot <- tab_n[tab_perc, on = "var"]
   }
 
@@ -105,7 +112,7 @@ freq_bivar_col_helper <- function(df, var, byvar, summary, weights){
   if(is.null(weights)){
     df_n <- df[, .(n = .N), keyby = c(var, byvar)]
   } else {
-    df_n <- df[, .(n = sum(.SD)), keyby = c(var, byvar), .SDcols = c(weights)]
+    df_n <- df[, .(n = round(sum(.SD)), 0), keyby = c(var, byvar), .SDcols = c(weights)]
   }
 
   # Add Sums for byvar
@@ -114,8 +121,8 @@ freq_bivar_col_helper <- function(df, var, byvar, summary, weights){
     df_byvar <- df[, .(n = .N), keyby = c(byvar)]
     df_var <- df[, .(n = .N), keyby = c(var)]
   } else {
-    df_byvar <- df[, .(n = sum(.SD)), keyby = c(byvar), .SDcols = c(weights)]
-    df_var <- df[, .(n = sum(.SD)), keyby = c(var), .SDcols = c(weights)]
+    df_byvar <- df[, .(n = round(sum(.SD)), 0), keyby = c(byvar), .SDcols = c(weights)]
+    df_var <- df[, .(n = round(sum(.SD)), 0), keyby = c(var), .SDcols = c(weights)]
   }
 
   df_byvar[, c(var) := "Total"]
@@ -147,10 +154,18 @@ freq_bivar_col_helper <- function(df, var, byvar, summary, weights){
   }
 
   if(isTRUE(summary)){
-    tab_perc[, "(Missing)" := NULL]
+
+    if(any("(Missing)" %in% colnames(tab_n))){
+      tab_perc[, "(Missing)" := NULL]
+    }
+
     tab_n[, Total := NULL]
     tab_n[, "n_valid" := rowSums(tab_n[, 2:(ncol(tab_perc)-2)], na.rm = T)]
-    setnames(tab_n, old = "(Missing)", new = "n_missing")
+
+    if(any("(Missing)" %in% colnames(tab_n))){
+      setnames(tab_n, old = "(Missing)", new = "n_missing")
+    } else tab_n[, n_missing := NA]
+
     tab_n <- tab_n[, .(var, n_valid, n_missing)]
 
     tab_tot <- tab_n[tab_perc, on = "var"]
