@@ -4,7 +4,7 @@
 \alias{lookup_fast}
 \title{Title}
 \usage{
-lookup_fast(df)
+lookup_fast(df, attribute_name = "label", item_text = c("[", "]"))
 }
 \arguments{
 \item{df}{}

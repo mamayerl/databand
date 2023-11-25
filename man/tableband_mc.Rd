@@ -4,7 +4,14 @@
 \alias{tableband_mc}
 \title{Create Table for Multiple Choice Answer}
 \usage{
-tableband_mc(df, row_vars, col_vars, count_factor, weight = NULL)
+tableband_mc(
+  df,
+  row_vars,
+  col_vars,
+  count_factor,
+  item_labels = T,
+  weight = NULL
+)
 }
 \arguments{
 \item{df}{Dataframe with variables}
@@ -14,6 +21,8 @@ tableband_mc(df, row_vars, col_vars, count_factor, weight = NULL)
 \item{col_vars}{Multiple Choice Variables to count for}
 
 \item{count_factor}{Factor Level to count for}
+
+\item{item_labels}{Boolean parameter for showing item labels (Default: True) or variable names (False). The item labels are generated from attributes ("label").}
 
 \item{weight}{Weight}
 }

@@ -3,6 +3,7 @@
 export(lookup_fast)
 export(tableband_bi)
 export(tableband_mc)
+export(tableband_mean)
 export(tableband_uni)
 import(data.table)
 import(forcats)

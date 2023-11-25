@@ -11,10 +11,11 @@
 #'
 #' @return
 #' @export
-#'
+
 #' @examples
 #' var_old <- paste0("q10KNOW_", c(1:3))
 #' test <- tableband_mean(pp2, row_vars = c("q1GEND", "attribute_4"), col_var = c(var_old), summary = T, item_labels = T, var_labels = T)
+
 
 
 tableband_mean <- function(df, row_vars, col_vars, weight = NULL, var_labels = F, digits = 2, summary = F, item_labels = F){

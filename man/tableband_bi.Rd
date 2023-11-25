@@ -21,7 +21,7 @@ tableband_bi(
 
 \item{col_vars}{Vector of variable names}
 
-\item{summary}{Output as summary (boolean variable)}
+\item{summary}{Output as summary (boolean)}
 
 \item{var_labels}{Use of variable labels (set as attributes in Inputdataframe)}
 

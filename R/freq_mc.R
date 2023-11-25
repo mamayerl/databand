@@ -59,6 +59,7 @@ rename_mc <- function(df, col_var, count_factor){
   new <- df[, ..keep_names]
   setnames(new, old = count_factor, new = col_var)
   new[, id := c(1:.N)]
+  return(new)
   #print(new)
 }
 
