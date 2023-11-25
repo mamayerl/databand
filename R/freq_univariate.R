@@ -14,12 +14,18 @@
 
 tableband_uni <- function(df, vars, var_labels = T, weights = NULL){
 
+  df_copy <- copy(df)
+
+  if(!is.data.table(df_copy)){
+    df_copy <- data.table(df_copy)
+  }
+
   if(isTRUE(var_labels)){
-    label_lookup_map <- lookup_fast(df) # Create Lookup Table for adding Labels
+    label_lookup_map <- lookup_fast(df_copy) # Create Lookup Table for adding Labels
   }
 
 
-  df_list <- lapply(vars, function (x) freq_univariate_helper(df, var = x, weights = weights)) # Apply Function on multiple Vars
+  df_list <- lapply(vars, function (x) freq_univariate_helper(df_copy, var = x, weights = weights)) # Apply Function on multiple Vars
 
   df_list <- rbindlist(df_list)
 
