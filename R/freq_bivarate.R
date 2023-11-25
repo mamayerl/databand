@@ -48,7 +48,7 @@ freq_bivar_helper <- function(df, var, byvar, summary, weights){
   if(is.null(weights)){
     df_n <- df[, .(n = .N), keyby = c(var, byvar)]
   } else {
-    df_n <- df[, .(n = sum(.SD)), keyby = c(var, byvar), .SDcols = c(weights)]
+    df_n <- df[, .(n = round(sum(.SD)), 0), keyby = c(var, byvar), .SDcols = c(weights)]
   }
 
   # Add Sums for byvar
@@ -56,7 +56,7 @@ freq_bivar_helper <- function(df, var, byvar, summary, weights){
   if(is.null(weights)){
     df_byvar <- df[, .(n = .N), keyby = c(byvar)]
   } else {
-    df_byvar <- df[, .(n = sum(.SD)), keyby = c(byvar), .SDcols = c(weights)]
+    df_byvar <- df[, .(n = round(sum(.SD)), 0), keyby = c(byvar), .SDcols = c(weights)]
   }
 
   df_byvar[, c(var) := "Total"]
