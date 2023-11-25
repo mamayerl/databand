@@ -28,7 +28,7 @@ out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5"))
 out <- tableband_uni(pp2, vars = c("q1GEND", "q10KNOW_5"), var_labels = F)
 
 ### tableband_bi ----
-out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
+out <- tableband_bi(pp, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"))
 out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), var_labels = F)
 out <- tableband_bi(pp2, c("q1GEND", "q10KNOW_1"), c("q10KNOW_5", "q10KNOW_4"), summary = T, weights = "age")
 

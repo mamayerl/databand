@@ -18,10 +18,17 @@
 #'
 
 tableband_bi <- function(df, row_vars, col_vars, summary = F, var_labels = T, weights = NULL, col_per = F){
+
   check_varnames(row_vars, col_vars) ## Check if Inputvariables are identical
 
+  df_copy <- copy(df)
+
+  if(!is.data.table(df_copy)){
+    df_copy <- data.table(df_copy)
+  }
+
   df_list <- lapply(col_vars, function(x) {
-    out <- freq_bivar(df, vars = row_vars, byvar = x, summary = summary, var_labels = var_labels,
+    out <- freq_bivar(df_copy, vars = row_vars, byvar = x, summary = summary, var_labels = var_labels,
                weights = weights, col_per = col_per)
 
     if(isTRUE(var_labels)) {

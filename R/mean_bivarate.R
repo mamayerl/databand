@@ -2,11 +2,18 @@ tableband_mean <- function(df, row_vars, col_vars, weight = NULL, var_labels = F
 
   check_varnames(row_vars, col_vars) ## Check if row vars equals col_vars
 
-  if(isTRUE(var_labels)){
-    label_tab <- lookup_fast(df) # Create Lookup Table for adding Labels
+  df_copy <- copy(df)
+
+  if(!is.data.table(df_copy)){
+    df_copy <- data.table(df_copy)
   }
 
-  tab_mean <- mean_bi(df = df, row_vars = row_vars, col_vars = col_vars,
+
+  if(isTRUE(var_labels)){
+    label_tab <- lookup_fast(df_copy) # Create Lookup Table for adding Labels
+  }
+
+  tab_mean <- mean_bi(df = df_copy, row_vars = row_vars, col_vars = col_vars,
                       weight = weight, var_labels = var_labels, digits = digits, summary = summary)
 
   if(isTRUE(item_labels) | isTRUE(var_labels)){

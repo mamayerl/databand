@@ -19,7 +19,14 @@
 
 tableband_mc <- function(df, row_vars, col_vars, count_factor, item_labels = T, weight = NULL){
 
-  tab_bi <- tableband_bi(df = df, row_vars = row_vars, col_vars = col_vars, summary = T,
+  df_copy <- copy(df)
+
+  if(!is.data.table(df_copy)){
+    df_copy <- data.table(df_copy)
+  }
+
+
+  tab_bi <- tableband_bi(df = df_copy, row_vars = row_vars, col_vars = col_vars, summary = T,
                          var_labels = T, weights = weight)
 
   ### Lables als Parameter einf
