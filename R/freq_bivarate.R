@@ -22,10 +22,13 @@ tableband_bi <- function(df, row_vars, col_vars, summary = F, var_labels = T, we
   check_varnames(row_vars, col_vars) ## Check if Inputvariables are identical
 
   df_copy <- copy(df)
-
   if(!is.data.table(df_copy)){
     df_copy <- data.table(df_copy)
   }
+
+  # convert to row or col_vars to factor if not: not working
+  vars <- c(row_vars, col_vars)
+  df_copy[, c(vars) := lapply(.SD, as.factor), .SDcols = c(vars)]
 
   df_list <- lapply(col_vars, function(x) {
     out <- freq_bivar(df_copy, vars = row_vars, byvar = x, summary = summary, var_labels = var_labels,
